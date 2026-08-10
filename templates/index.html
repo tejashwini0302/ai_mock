@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placement-Ready AI Career Agent</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <span>Hi, {{ username }}</span>
+      <a href="/logout" class="link-btn">Log out</a>
+    </div>
+
+    <header class="hero">
+      <h1>Placement-Ready AI Career Agent</h1>
+      <p>Upload your resume, connect GitHub, and get an ATS score, skill-gap analysis, job recommendations, and a personalized roadmap.</p>
+    </header>
+
+    <section class="glass form-section">
+      <form id="careerForm">
+        <div class="form-grid">
+          <div class="field">
+            <label>Target role</label>
+            <input type="text" id="role" placeholder="e.g. Java Developer, Data Analyst, DevOps Engineer" required />
+          </div>
+
+          <div class="field">
+            <label>GitHub username</label>
+            <input type="text" id="github" placeholder="e.g. octocat" required />
+          </div>
+
+          <div class="field field-full">
+            <label>Resume (PDF)</label>
+            <input type="file" id="resume" accept=".pdf" />
+          </div>
+        </div>
+
+        <button type="submit" class="primary-btn">Analyze my profile</button>
+        <button type="button" id="viewHistoryBtn" class="link-btn">View my past analyses</button>
+        <p id="formError" class="error-text" hidden></p>
+      </form>
+    </section>
+
+    <section class="glass history-section" id="historySection" hidden>
+      <h2>Past analyses</h2>
+      <div id="historyList" class="history-list"></div>
+    </section>
+  </div>
+
+  <script src="/static/home.js"></script>
+</body>
+</html>

@@ -15,6 +15,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from authlib.integrations.starlette_client import OAuth
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -46,6 +47,23 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# ---- Google Sign-In (separate from the GOOGLE_API_KEY used for Gemini) ----
+GOOGLE_OAUTH_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
+
+oauth = OAuth()
+if GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET:
+    oauth.register(
+        name="google",
+        client_id=GOOGLE_OAUTH_CLIENT_ID,
+        client_secret=GOOGLE_OAUTH_CLIENT_SECRET,
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid email profile"},
+    )
+    print("[startup] Google Sign-In enabled", flush=True)
+else:
+    print("[startup] Google Sign-In NOT configured (GOOGLE_OAUTH_CLIENT_ID/SECRET missing)", flush=True)
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -141,6 +159,34 @@ async def signup_submit(
 async def logout(request: Request):
     request.session.clear()
     return RedirectResponse("/login", status_code=303)
+
+
+@app.get("/auth/google")
+async def auth_google(request: Request):
+    if "google" not in oauth._clients:
+        return HTMLResponse(
+            "Google Sign-In isn't configured on this server yet. Use username/password instead.",
+            status_code=503
+        )
+    redirect_uri = request.url_for("auth_google_callback")
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+
+@app.get("/auth/google/callback")
+async def auth_google_callback(request: Request):
+    try:
+        token = await oauth.google.authorize_access_token(request)
+        user_info = token.get("userinfo")
+        email = user_info["email"]
+        google_id = user_info["sub"]
+    except Exception as e:
+        print(f"[google-auth] failed: {e}", flush=True)
+        return RedirectResponse("/login", status_code=303)
+
+    user_id = await asyncio.to_thread(db.get_or_create_google_user, email, google_id)
+    request.session["user_id"] = user_id
+    request.session["username"] = await asyncio.to_thread(db.get_username, user_id)
+    return RedirectResponse("/", status_code=303)
 
 
 @app.get("/", response_class=HTMLResponse)

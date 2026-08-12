@@ -18,3 +18,4 @@ numpy
 sentry-sdk
 bcrypt
 itsdangerous
+authlib

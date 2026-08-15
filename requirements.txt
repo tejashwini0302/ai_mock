@@ -19,3 +19,4 @@ sentry-sdk
 bcrypt
 itsdangerous
 authlib
+reportlab

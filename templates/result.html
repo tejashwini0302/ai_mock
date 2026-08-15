@@ -8,6 +8,29 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
+  <div class="result-topbar">
+  <div>
+    <span class="result-welcome">
+      Hi, {{ username }}
+    </span>
+  </div>
+
+  <div class="result-actions">
+    <a
+      href="/result/{{ result_id }}/pdf"
+      class="download-pdf-btn"
+    >
+      ↓ Download as PDF
+    </a>
+
+    <a
+      href="/"
+      class="result-back-btn"
+    >
+      Back to dashboard
+    </a>
+  </div>
+</div>
   <div class="container">
     <div class="topbar">
       <span>Hi, {{ username }}</span>

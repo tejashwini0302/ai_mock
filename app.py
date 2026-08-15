@@ -11,7 +11,12 @@ from io import BytesIO
 from datetime import datetime, timezone
 
 from fastapi import FastAPI, Request, UploadFile, File, Form, Depends, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import (
+    HTMLResponse,
+    JSONResponse,
+    RedirectResponse,
+    Response,
+)
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -31,7 +36,7 @@ from duckduckgo_search import DDGS
 from pypdf import PdfReader
 
 import db
-
+from pdf_report import generate_pdf
 # -----------------------------
 # 1. FASTAPI APP + RATE LIMITING + SESSIONS
 # -----------------------------
@@ -739,21 +744,74 @@ async def analyze(
         return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
 
 
-@app.get("/result/{result_id}", response_class=HTMLResponse)
-async def result_page(request: Request, result_id: int):
+@app.get("/result/{result_id}/pdf")
+async def download_result_pdf(request: Request, result_id: int):
     user_id = get_current_user_id(request)
+
     if user_id is None:
         return RedirectResponse("/login", status_code=303)
 
-    row = await asyncio.to_thread(db.get_analysis, result_id)
-    if row is None or row["user_id"] != user_id:
-        return HTMLResponse("Result not found.", status_code=404)
+    row = await asyncio.to_thread(
+        db.get_analysis,
+        result_id
+    )
 
-    return templates.TemplateResponse(request, "result.html", {
-        "username": request.session.get("username"),
-        "result_json": row["result_json"],  # already a JSON string, embedded directly into the page
-        "created_at": row["created_at"]
-    })
+    if row is None or row["user_id"] != user_id:
+        return HTMLResponse(
+            "Result not found.",
+            status_code=404
+        )
+
+    try:
+        result = json.loads(row["result_json"])
+
+        pdf_bytes = await asyncio.to_thread(
+            generate_pdf,
+            result,
+            request.session.get("username", ""),
+            row["created_at"],
+        )
+
+        role = result.get(
+            "role",
+            "career-report"
+        )
+
+        # Make a safe filename
+        safe_role = re.sub(
+            r"[^A-Za-z0-9]+",
+            "-",
+            str(role)
+        ).strip("-").lower()
+
+        filename = (
+            f"placement-report-{safe_role or 'career'}-{result_id}.pdf"
+        )
+
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": (
+                    f'attachment; filename="{filename}"'
+                ),
+                "Cache-Control": "no-store",
+            },
+        )
+
+    except Exception as e:
+        print(
+            f"[pdf] ERROR: {type(e).__name__}: {e}",
+            flush=True,
+        )
+
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": "Could not generate the PDF."
+            },
+        )
 
 
 @app.get("/history")

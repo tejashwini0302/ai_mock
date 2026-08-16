@@ -213,6 +213,56 @@ def verify_login(username: str, password: str):
     finally:
         session.close()
 
+def get_or_create_google_user(email: str, google_id: str):
+    """
+    Find an existing account by Google email.
+    If it doesn't exist, create one.
+
+    google_id is accepted so the function matches the
+    Google OAuth callback, but we don't need a separate
+    database column for it.
+    """
+
+    session = SessionLocal()
+
+    try:
+        email = email.strip().lower()
+
+        user = (
+            session.query(User)
+            .filter(User.username == email)
+            .first()
+        )
+
+        if user:
+            return user.id
+
+        # Google users don't use the normal password login.
+        random_password = (
+            f"google-{google_id}-"
+            f"{datetime.now(timezone.utc).timestamp()}"
+        )
+
+        password_hash = (
+            bcrypt.hashpw(
+                random_password.encode(),
+                bcrypt.gensalt()
+            ).decode()
+        )
+
+        user = User(
+            username=email,
+            password_hash=password_hash,
+        )
+
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+
+        return user.id
+
+    finally:
+        session.close()
 
 def get_username(user_id: int):
     session = SessionLocal()

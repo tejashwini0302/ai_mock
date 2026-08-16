@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Your Results - Placement-Ready AI Career Agent</title>
 
-    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/style.css">
 
-    <!-- html2pdf -->
+    <!-- html2pdf library -->
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
     </script>
@@ -16,66 +16,47 @@
 
 <body>
 
-    <!-- =====================================================
-         TOP BAR
-         ===================================================== -->
-
-    <div class="result-topbar">
-
-        <div>
-            <span class="result-welcome">
-                Hi, {{ username }}
-            </span>
-        </div>
-
-        <div class="result-actions">
-
-            <button
-                type="button"
-                id="downloadBtn"
-                class="download-pdf-btn"
-            >
-                ↓ Download as PDF
-            </button>
-
-            <a
-                href="/"
-                class="result-back-btn"
-            >
-                Back to dashboard
-            </a>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         MAIN CONTAINER
-         ===================================================== -->
+    <!-- =========================================================
+         TOP NAVIGATION BAR
+         
+         IMPORTANT:
+         This entire section is OUTSIDE #pdfTarget.
+         Therefore it will NOT be included in the PDF.
+         ========================================================= -->
 
     <div class="container">
 
-        <!-- Dashboard navigation -->
+        <div class="result-topbar">
 
-        <div class="topbar">
-
-            <span>
+            <!-- Left side -->
+            <div class="result-welcome">
                 Hi, {{ username }}
-            </span>
+            </div>
 
-            <div>
+            <!-- Right side -->
+            <div class="result-actions">
 
+                <!-- PDF BUTTON -->
+                <button
+                    type="button"
+                    id="downloadBtn"
+                    class="download-pdf-btn"
+                >
+                    ↓ Download as PDF
+                </button>
+
+                <!-- Dashboard -->
                 <a
                     href="/"
-                    class="link-btn"
+                    class="result-back-btn"
                 >
-                    New analysis
+                    Back to dashboard
                 </a>
 
+                <!-- Logout -->
                 <a
                     href="/logout"
-                    class="link-btn"
+                    class="result-back-btn"
                 >
                     Log out
                 </a>
@@ -85,47 +66,50 @@
         </div>
 
 
-        <!-- =================================================
-             PAGE HEADER
-             ================================================= -->
-
-        <header class="hero">
-
-            <h1>
-                Your placement readiness report
-            </h1>
-
-            <p class="muted">
-                Generated {{ created_at }}
-            </p>
-
-        </header>
-
-
-        <!-- =================================================
-             PDF CONTENT START
+        <!-- =====================================================
+             PDF CONTENT
              
-             IMPORTANT:
-             The download button is OUTSIDE this container.
-             Therefore it will NOT appear in the PDF.
-             ================================================= -->
+             Everything inside this div will be converted
+             into the PDF.
+             
+             The download button is NOT inside this div.
+             ===================================================== -->
 
-        <section
-            class="dashboard"
-            id="resultsSection"
-        >
-
-            <div id="pdfTarget">
+        <div id="pdfTarget">
 
 
-                <!-- =============================================
-                     SCORE CARDS
-                     ============================================= -->
+            <!-- =================================================
+                 REPORT HEADER
+                 ================================================= -->
+
+            <header class="hero">
+
+                <h1>
+                    Your Placement Readiness Report
+                </h1>
+
+                <p class="muted">
+                    Generated {{ created_at }}
+                </p>
+
+            </header>
+
+
+            <!-- =================================================
+                 SCORE DASHBOARD
+                 ================================================= -->
+
+            <section
+                class="dashboard"
+                id="resultsSection"
+            >
 
                 <div class="cards">
 
 
-                    <!-- ATS -->
+                    <!-- ================================
+                         ATS SCORE
+                         ================================ -->
 
                     <div class="card">
 
@@ -153,7 +137,9 @@
                     </div>
 
 
-                    <!-- PLACEMENT READINESS -->
+                    <!-- ================================
+                         PLACEMENT READINESS
+                         ================================ -->
 
                     <div class="card">
 
@@ -176,7 +162,9 @@
                     </div>
 
 
-                    <!-- GITHUB -->
+                    <!-- ================================
+                         GITHUB SCORE
+                         ================================ -->
 
                     <div class="card">
 
@@ -201,14 +189,16 @@
                 </div>
 
 
-                <!-- =============================================
-                     MAIN ANALYSIS GRID
-                     ============================================= -->
+                <!-- =================================================
+                     MAIN ANALYSIS SECTIONS
+                     ================================================= -->
 
                 <div class="grid">
 
 
-                    <!-- SKILL GAP -->
+                    <!-- ================================
+                         SKILL GAP ANALYSIS
+                         ================================ -->
 
                     <div class="glass panel">
 
@@ -224,7 +214,9 @@
                     </div>
 
 
-                    <!-- GITHUB EVALUATION -->
+                    <!-- ================================
+                         GITHUB EVALUATION
+                         ================================ -->
 
                     <div class="glass panel">
 
@@ -240,7 +232,9 @@
                     </div>
 
 
-                    <!-- PROJECTS -->
+                    <!-- ================================
+                         RECOMMENDED PROJECTS
+                         ================================ -->
 
                     <div class="glass panel">
 
@@ -256,7 +250,9 @@
                     </div>
 
 
-                    <!-- JOBS -->
+                    <!-- ================================
+                         JOB RECOMMENDATIONS
+                         ================================ -->
 
                     <div class="glass panel">
 
@@ -274,9 +270,9 @@
                 </div>
 
 
-                <!-- =============================================
+                <!-- =================================================
                      30-DAY ROADMAP
-                     ============================================= -->
+                     ================================================= -->
 
                 <div class="glass roadmap">
 
@@ -292,19 +288,22 @@
                 </div>
 
 
-            </div>
+            </section>
 
-        </section>
+        </div>
+        <!-- END PDF TARGET -->
+
 
     </div>
+    <!-- END CONTAINER -->
 
 
-    <!-- =====================================================
-         ANALYSIS JSON
+    <!-- =========================================================
+         ANALYSIS DATA
          
-         FastAPI/Jinja puts the saved analysis JSON here.
-         result.js reads this element.
-         ===================================================== -->
+         FastAPI/Jinja inserts the saved JSON here.
+         result.js reads this element and renders the report.
+         ========================================================= -->
 
     <script
         id="analysisData"
@@ -312,9 +311,9 @@
     >{{ result_json | safe }}</script>
 
 
-    <!-- =====================================================
+    <!-- =========================================================
          RESULT JAVASCRIPT
-         ===================================================== -->
+         ========================================================= -->
 
     <script src="/static/result.js"></script>
 

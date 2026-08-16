@@ -1,105 +1,322 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your results - Placement-Ready AI Career Agent</title>
-  <link rel="stylesheet" href="/static/style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Your Results - Placement-Ready AI Career Agent</title>
+
+    <link rel="stylesheet" href="/static/style.css" />
+
+    <!-- html2pdf -->
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
+    </script>
 </head>
+
 <body>
-  <div class="result-topbar">
-  <div>
-    <span class="result-welcome">
-      Hi, {{ username }}
-    </span>
-  </div>
 
-  <div class="result-actions">
-    <a
-      href="/result/{{ result_id }}/pdf"
-      class="download-pdf-btn"
-    >
-      ↓ Download as PDF
-    </a>
+    <!-- =====================================================
+         TOP BAR
+         ===================================================== -->
 
-    <a
-      href="/"
-      class="result-back-btn"
-    >
-      Back to dashboard
-    </a>
-  </div>
-</div>
-  <div class="container">
-    <div class="topbar">
-      <span>Hi, {{ username }}</span>
-      <div>
-        <a href="/" class="link-btn">New analysis</a>
-        <a href="/logout" class="link-btn">Log out</a>
-      </div>
+    <div class="result-topbar">
+
+        <div>
+            <span class="result-welcome">
+                Hi, {{ username }}
+            </span>
+        </div>
+
+        <div class="result-actions">
+
+            <button
+                type="button"
+                id="downloadBtn"
+                class="download-pdf-btn"
+            >
+                ↓ Download as PDF
+            </button>
+
+            <a
+                href="/"
+                class="result-back-btn"
+            >
+                Back to dashboard
+            </a>
+
+        </div>
+
     </div>
 
-    <header class="hero">
-      <h1>Your placement readiness report</h1>
-      <p class="muted">Generated {{ created_at }}</p>
-      <button id="downloadBtn" class="primary-btn download-btn">Download as PDF</button>
-    </header>
 
-    <section class="dashboard" id="resultsSection">
-      <div id="pdfTarget">
-        <div class="cards">
-          <div class="card">
-            <h3>ATS score</h3>
-            <div class="score-circle" id="atsScore">--</div>
-            <p class="score-note" id="atsMethod"></p>
-            <p class="score-note" id="atsNote"></p>
-          </div>
+    <!-- =====================================================
+         MAIN CONTAINER
+         ===================================================== -->
 
-          <div class="card">
-            <h3>Placement readiness</h3>
-            <div class="score-circle green" id="readinessScore">--</div>
-            <p class="score-note">Weighted from ATS score (60%) and GitHub activity (40%)</p>
-          </div>
+    <div class="container">
 
-          <div class="card">
-            <h3>GitHub score</h3>
-            <div class="score-circle blue" id="githubScore">--</div>
-            <p class="score-note" id="githubNote"></p>
-          </div>
+        <!-- Dashboard navigation -->
+
+        <div class="topbar">
+
+            <span>
+                Hi, {{ username }}
+            </span>
+
+            <div>
+
+                <a
+                    href="/"
+                    class="link-btn"
+                >
+                    New analysis
+                </a>
+
+                <a
+                    href="/logout"
+                    class="link-btn"
+                >
+                    Log out
+                </a>
+
+            </div>
+
         </div>
 
-        <div class="grid">
-          <div class="glass panel">
-            <h2>Skill gap analysis</h2>
-            <div class="chips" id="skillGap"></div>
-          </div>
 
-          <div class="glass panel">
-            <h2>GitHub evaluation</h2>
-            <ul id="githubEval" class="list"></ul>
-          </div>
+        <!-- =================================================
+             PAGE HEADER
+             ================================================= -->
 
-          <div class="glass panel">
-            <h2>Recommended projects</h2>
-            <ul id="projects" class="list"></ul>
-          </div>
+        <header class="hero">
 
-          <div class="glass panel">
-            <h2>Job recommendations</h2>
-            <div id="jobs" class="jobs"></div>
-          </div>
-        </div>
+            <h1>
+                Your placement readiness report
+            </h1>
 
-        <div class="glass roadmap">
-          <h2>30-day roadmap</h2>
-          <div class="timeline" id="roadmapTimeline"></div>
-        </div>
-      </div>
-    </section>
-  </div>
+            <p class="muted">
+                Generated {{ created_at }}
+            </p>
 
-  <script id="analysisData" type="application/json">{{ result_json | safe }}</script>
-  <script src="/static/result.js"></script>
+        </header>
+
+
+        <!-- =================================================
+             PDF CONTENT START
+             
+             IMPORTANT:
+             The download button is OUTSIDE this container.
+             Therefore it will NOT appear in the PDF.
+             ================================================= -->
+
+        <section
+            class="dashboard"
+            id="resultsSection"
+        >
+
+            <div id="pdfTarget">
+
+
+                <!-- =============================================
+                     SCORE CARDS
+                     ============================================= -->
+
+                <div class="cards">
+
+
+                    <!-- ATS -->
+
+                    <div class="card">
+
+                        <h3>
+                            ATS Score
+                        </h3>
+
+                        <div
+                            class="score-circle"
+                            id="atsScore"
+                        >
+                            --
+                        </div>
+
+                        <p
+                            class="score-note"
+                            id="atsMethod"
+                        ></p>
+
+                        <p
+                            class="score-note"
+                            id="atsNote"
+                        ></p>
+
+                    </div>
+
+
+                    <!-- PLACEMENT READINESS -->
+
+                    <div class="card">
+
+                        <h3>
+                            Placement Readiness
+                        </h3>
+
+                        <div
+                            class="score-circle green"
+                            id="readinessScore"
+                        >
+                            --
+                        </div>
+
+                        <p class="score-note">
+                            Weighted from ATS score (60%)
+                            and GitHub activity (40%)
+                        </p>
+
+                    </div>
+
+
+                    <!-- GITHUB -->
+
+                    <div class="card">
+
+                        <h3>
+                            GitHub Score
+                        </h3>
+
+                        <div
+                            class="score-circle blue"
+                            id="githubScore"
+                        >
+                            --
+                        </div>
+
+                        <p
+                            class="score-note"
+                            id="githubNote"
+                        ></p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================================
+                     MAIN ANALYSIS GRID
+                     ============================================= -->
+
+                <div class="grid">
+
+
+                    <!-- SKILL GAP -->
+
+                    <div class="glass panel">
+
+                        <h2>
+                            Skill Gap Analysis
+                        </h2>
+
+                        <div
+                            class="chips"
+                            id="skillGap"
+                        ></div>
+
+                    </div>
+
+
+                    <!-- GITHUB EVALUATION -->
+
+                    <div class="glass panel">
+
+                        <h2>
+                            GitHub Evaluation
+                        </h2>
+
+                        <ul
+                            id="githubEval"
+                            class="list"
+                        ></ul>
+
+                    </div>
+
+
+                    <!-- PROJECTS -->
+
+                    <div class="glass panel">
+
+                        <h2>
+                            Recommended Projects
+                        </h2>
+
+                        <ul
+                            id="projects"
+                            class="list"
+                        ></ul>
+
+                    </div>
+
+
+                    <!-- JOBS -->
+
+                    <div class="glass panel">
+
+                        <h2>
+                            Job Recommendations
+                        </h2>
+
+                        <div
+                            id="jobs"
+                            class="jobs"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================================
+                     30-DAY ROADMAP
+                     ============================================= -->
+
+                <div class="glass roadmap">
+
+                    <h2>
+                        30-Day Roadmap
+                    </h2>
+
+                    <div
+                        class="timeline"
+                        id="roadmapTimeline"
+                    ></div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- =====================================================
+         ANALYSIS JSON
+         
+         FastAPI/Jinja puts the saved analysis JSON here.
+         result.js reads this element.
+         ===================================================== -->
+
+    <script
+        id="analysisData"
+        type="application/json"
+    >{{ result_json | safe }}</script>
+
+
+    <!-- =====================================================
+         RESULT JAVASCRIPT
+         ===================================================== -->
+
+    <script src="/static/result.js"></script>
+
 </body>
 </html>
